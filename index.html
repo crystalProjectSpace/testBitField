@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="./binary.js"></script>
+        <meta charset="utf-8" />
+    </head>
+    <body></body>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const setNextNormal = (now, next) => ({t0: now.t1, t1: next})
+            const N_ITER = 1500000
+            let DX = 0
+
+            const nowP1 = performance.now()
+            for(let i=0; i < N_ITER; i++) {
+                DX = [
+                    {
+                        now: 0b1010,
+                        upd: 0b0011
+                    },
+                    {
+                        now: 0b0000,
+                        upd: 0b0001
+                    },
+                    {
+                        now: 0b1001,
+                        upd: 0b0011
+                    },
+                    {
+                        now: 0b0110,
+                        upd: 0b0010
+                    }
+                ].reduce( (x, bitPair) => x + setNext(bitPair.now, bitPair.upd), 0)
+            }
+            const dT1 = performance.now() - nowP1
+            console.log(DX)
+
+            const nowP2 = performance.now()
+            for(let i = 0; i < N_ITER; i++) {
+                DX = [
+                    {
+                        now: {t0: 2, t1: 2},
+                        upd: 3
+                    },
+                    {
+                        now: {t0: 0, t1: 0},
+                        upd: 1
+                    },
+                    {
+                        now: {t0: 1, t1: 2},
+                        upd: 3
+                    },
+                    {
+                        now: {t0: 2, t1: 1},
+                        upd: 2
+                    }
+                ].reduce( (x, bitPair) => {
+                    const now1 = setNextNormal(bitPair.now, bitPair.upd)
+                    return x + now1.t0
+                }, 0)
+            }
+            const dT2 = performance.now() - nowP2
+            console.log(DX)
+
+            console.log(`dPerf = ${100 * (dT2 - dT1)/dT2}%`)
+            document.write([
+                'Тест - замена двух значений в записи',
+                `количество прогонов для теста: ${N_ITER}`,
+                `Результат для байтовой записи: ${dT1.toFixed(2)}`,
+                `Результат для объекта: ${dT2.toFixed(2)}`,
+                `Относительный выигрыш по времени: ${(100 * (dT2 - dT1)/dT2).toFixed(2)}%`
+            ].join('<br/>'))
+        })
+    </script>
+</html>
